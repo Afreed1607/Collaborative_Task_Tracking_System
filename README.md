@@ -35,6 +35,13 @@ Tests use Node's built-in test runner and Supertest. The suite covers unit valid
 
 Authentication endpoints use configurable rate limits through `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX`. Production requires a non-placeholder `JWT_SECRET` and an explicit `CORS_ORIGINS` allowlist.
 
+For a quick manual smoke check after starting the API:
+
+```powershell
+Invoke-RestMethod http://localhost:3000/health
+Invoke-WebRequest http://localhost:3000/docs/ | Select-Object -ExpandProperty StatusCode
+```
+
 ## Docker
 
 ```powershell
