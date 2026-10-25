@@ -1,0 +1,19 @@
+services:
+  taskmaster:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the environment}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      DATABASE_FILE: /app/data/taskmaster.db
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - taskmaster-data:/app/data
+      - taskmaster-uploads:/app/uploads
+
+volumes:
+  taskmaster-data:
+  taskmaster-uploads:

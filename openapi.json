@@ -1,0 +1,82 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TaskMaster API",
+    "version": "1.0.0",
+    "description": "Collaborative task, team, and project management API."
+  },
+  "servers": [{ "url": "http://localhost:3000" }],
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/health": { "get": { "security": [], "responses": { "200": { "description": "Service is healthy" } } } },
+    "/openapi.json": { "get": { "security": [], "responses": { "200": { "description": "OpenAPI specification", "content": { "application/json": { "schema": { "type": "object" } } } } } } },
+    "/docs/": { "get": { "security": [], "responses": { "200": { "description": "Swagger UI HTML" } } } },
+    "/api/auth/register": { "post": { "security": [], "requestBody": { "$ref": "#/components/requestBodies/AuthCredentials" }, "responses": { "201": { "description": "User registered" }, "400": { "$ref": "#/components/responses/ValidationError" }, "409": { "description": "Email already registered" } } } },
+    "/api/auth/login": { "post": { "security": [], "requestBody": { "$ref": "#/components/requestBodies/Login" }, "responses": { "200": { "description": "Authenticated" }, "400": { "$ref": "#/components/responses/ValidationError" }, "401": { "description": "Invalid credentials" } } } },
+    "/api/auth/logout": { "post": { "responses": { "204": { "description": "Session revoked" } } } },
+    "/api/me": { "get": { "responses": { "200": { "description": "Current profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserResponse" } } } } } }, "patch": { "requestBody": { "$ref": "#/components/requestBodies/Profile" }, "responses": { "200": { "description": "Updated profile" }, "400": { "$ref": "#/components/responses/ValidationError" } } } },
+    "/api/teams": { "get": { "responses": { "200": { "description": "Teams visible to the user" } } }, "post": { "requestBody": { "$ref": "#/components/requestBodies/Team" }, "responses": { "201": { "description": "Team created" }, "400": { "$ref": "#/components/responses/ValidationError" } } } },
+    "/api/teams/{teamId}": { "patch": { "parameters": [{ "$ref": "#/components/parameters/teamId" }], "requestBody": { "$ref": "#/components/requestBodies/TeamUpdate" }, "responses": { "200": { "description": "Team updated" }, "403": { "$ref": "#/components/responses/Forbidden" } } }, "delete": { "parameters": [{ "$ref": "#/components/parameters/teamId" }], "responses": { "204": { "description": "Team deleted" } } } },
+    "/api/teams/{teamId}/members": { "get": { "parameters": [{ "$ref": "#/components/parameters/teamId" }], "responses": { "200": { "description": "Team members" } } }, "post": { "parameters": [{ "$ref": "#/components/parameters/teamId" }], "requestBody": { "$ref": "#/components/requestBodies/Member" }, "responses": { "201": { "description": "Member added" } } } },
+    "/api/teams/{teamId}/members/{userId}": { "delete": { "parameters": [{ "$ref": "#/components/parameters/teamId" }, { "$ref": "#/components/parameters/userId" }], "responses": { "204": { "description": "Member removed" } } } },
+    "/api/teams/{teamId}/invitations": { "post": { "parameters": [{ "$ref": "#/components/parameters/teamId" }], "requestBody": { "$ref": "#/components/requestBodies/Invitation" }, "responses": { "201": { "description": "Invitation created" }, "403": { "$ref": "#/components/responses/Forbidden" } } } },
+    "/api/projects": { "get": { "responses": { "200": { "description": "Projects visible to the user" } } }, "post": { "requestBody": { "$ref": "#/components/requestBodies/Project" }, "responses": { "201": { "description": "Project created" } } } },
+    "/api/projects/{projectId}": { "patch": { "parameters": [{ "$ref": "#/components/parameters/projectId" }], "requestBody": { "$ref": "#/components/requestBodies/ProjectUpdate" }, "responses": { "200": { "description": "Project updated" } } }, "delete": { "parameters": [{ "$ref": "#/components/parameters/projectId" }], "responses": { "204": { "description": "Project deleted" } } } },
+    "/api/projects/{projectId}/members": { "get": { "parameters": [{ "$ref": "#/components/parameters/projectId" }], "responses": { "200": { "description": "Project members" } } } },
+    "/api/projects/{projectId}/members/{userId}": { "delete": { "parameters": [{ "$ref": "#/components/parameters/projectId" }, { "$ref": "#/components/parameters/userId" }], "responses": { "204": { "description": "Member removed" } } } },
+    "/api/projects/{projectId}/invitations": { "post": { "parameters": [{ "$ref": "#/components/parameters/projectId" }], "requestBody": { "$ref": "#/components/requestBodies/Invitation" }, "responses": { "201": { "description": "Invitation created" } } } },
+    "/api/invitations": { "get": { "responses": { "200": { "description": "Current user's invitations" } } } },
+    "/api/invitations/{type}/{invitationId}/respond": { "post": { "parameters": [{ "$ref": "#/components/parameters/type" }, { "$ref": "#/components/parameters/invitationId" }], "requestBody": { "$ref": "#/components/requestBodies/InvitationResponse" }, "responses": { "200": { "description": "Invitation accepted or declined" }, "409": { "description": "Expired or already handled" } } } },
+    "/api/tasks": { "get": { "parameters": [{ "$ref": "#/components/parameters/page" }, { "$ref": "#/components/parameters/limit" }, { "$ref": "#/components/parameters/taskFilters" }], "responses": { "200": { "description": "Paginated tasks" } } }, "post": { "requestBody": { "$ref": "#/components/requestBodies/Task" }, "responses": { "201": { "description": "Task created" }, "400": { "$ref": "#/components/responses/ValidationError" } } } },
+    "/api/tasks/assigned-to-me": { "get": { "parameters": [{ "$ref": "#/components/parameters/page" }, { "$ref": "#/components/parameters/limit" }], "responses": { "200": { "description": "Paginated tasks assigned to the current user" } } } },
+    "/api/tasks/{taskId}": { "get": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "responses": { "200": { "description": "Task" }, "404": { "$ref": "#/components/responses/NotFound" } } }, "patch": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "requestBody": { "$ref": "#/components/requestBodies/TaskUpdate" }, "responses": { "200": { "description": "Updated task" }, "409": { "description": "Invalid state transition" } } }, "delete": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "responses": { "204": { "description": "Deleted task" } } } },
+    "/api/tasks/{taskId}/comments": { "get": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "responses": { "200": { "description": "Task comments" } } }, "post": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "requestBody": { "$ref": "#/components/requestBodies/Comment" }, "responses": { "201": { "description": "Comment created" } } } },
+    "/api/tasks/{taskId}/comments/{commentId}": { "patch": { "parameters": [{ "$ref": "#/components/parameters/taskId" }, { "$ref": "#/components/parameters/commentId" }], "requestBody": { "$ref": "#/components/requestBodies/Comment" }, "responses": { "200": { "description": "Comment updated" } } }, "delete": { "parameters": [{ "$ref": "#/components/parameters/taskId" }, { "$ref": "#/components/parameters/commentId" }], "responses": { "204": { "description": "Comment deleted" } } } },
+    "/api/tasks/{taskId}/attachments": { "get": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "responses": { "200": { "description": "Task attachments" } } }, "post": { "parameters": [{ "$ref": "#/components/parameters/taskId" }], "requestBody": { "$ref": "#/components/requestBodies/AttachmentUpload" }, "responses": { "201": { "description": "Attachment uploaded" }, "400": { "description": "Unsupported file" } } } },
+    "/api/tasks/{taskId}/attachments/{attachmentId}": { "get": { "parameters": [{ "$ref": "#/components/parameters/taskId" }, { "$ref": "#/components/parameters/attachmentId" }], "responses": { "200": { "description": "File download" } } }, "delete": { "parameters": [{ "$ref": "#/components/parameters/taskId" }, { "$ref": "#/components/parameters/attachmentId" }], "responses": { "204": { "description": "Attachment deleted" } } } }
+  },
+  "components": {
+    "securitySchemes": { "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" } },
+    "parameters": {
+      "projectId": { "name": "projectId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "teamId": { "name": "teamId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "type": { "name": "type", "in": "path", "required": true, "schema": { "type": "string", "enum": ["team", "project"] } },
+      "invitationId": { "name": "invitationId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "taskId": { "name": "taskId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "commentId": { "name": "commentId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "attachmentId": { "name": "attachmentId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "userId": { "name": "userId", "in": "path", "required": true, "schema": { "type": "integer" } },
+      "page": { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+      "limit": { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 } },
+      "taskFilters": { "name": "filters", "in": "query", "schema": { "type": "string" }, "description": "Use status, priority, assigneeId, teamId, projectId, search, sort, and order query parameters." }
+    },
+    "requestBodies": {
+      "Profile": { "required": true, "content": { "application/json": { "schema": { "type": "object", "properties": { "name": { "type": "string" }, "avatarUrl": { "type": "string", "format": "uri", "nullable": true } } } } } },
+      "AuthCredentials": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["name", "email", "password"], "properties": { "name": { "type": "string" }, "email": { "type": "string", "format": "email" }, "password": { "type": "string", "format": "password", "minLength": 8 } } } } } },
+      "Login": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["email", "password"], "properties": { "email": { "type": "string", "format": "email" }, "password": { "type": "string", "format": "password" } } } } } },
+      "Team": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NamedResource" } } } },
+      "TeamUpdate": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NamedResourceUpdate" } } } },
+      "Project": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NamedResource" } } } },
+      "ProjectUpdate": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NamedResourceUpdate" } } } },
+      "Member": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["userId"], "properties": { "userId": { "type": "integer" } } } } } },
+      "Invitation": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["userId"], "properties": { "userId": { "type": "integer" }, "expiresInDays": { "type": "integer", "minimum": 1, "maximum": 30, "default": 7 } } } } } },
+      "InvitationResponse": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["action"], "properties": { "action": { "type": "string", "enum": ["accept", "decline"] } } } } } },
+      "Task": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TaskInput" } } } },
+      "TaskUpdate": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TaskInput" } } } },
+      "Comment": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["body"], "properties": { "body": { "type": "string", "maxLength": 2000 } } } } } },
+      "AttachmentUpload": { "required": true, "content": { "multipart/form-data": { "schema": { "type": "object", "required": ["file"], "properties": { "file": { "type": "string", "format": "binary" } } } } } }
+    },
+    "schemas": {
+      "UserResponse": { "type": "object", "properties": { "user": { "$ref": "#/components/schemas/User" } } },
+      "User": { "type": "object", "properties": { "id": { "type": "integer" }, "name": { "type": "string" }, "email": { "type": "string", "format": "email" }, "avatarUrl": { "type": "string", "nullable": true } } },
+      "NamedResource": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" }, "description": { "type": "string" } } },
+      "NamedResourceUpdate": { "type": "object", "properties": { "name": { "type": "string" }, "description": { "type": "string", "nullable": true } } },
+      "TaskInput": { "type": "object", "properties": { "title": { "type": "string" }, "description": { "type": "string" }, "dueDate": { "type": "string", "format": "date-time" }, "status": { "type": "string", "enum": ["open", "in_progress", "completed"] }, "priority": { "type": "string", "enum": ["low", "medium", "high"] }, "teamId": { "type": "integer", "nullable": true }, "projectId": { "type": "integer", "nullable": true }, "assigneeId": { "type": "integer", "nullable": true } } }
+    },
+    "responses": {
+      "ValidationError": { "description": "Request validation failed" },
+      "Forbidden": { "description": "Authorization failed" },
+      "NotFound": { "description": "Resource not found" }
+    }
+  }
+}
